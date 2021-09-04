@@ -12,10 +12,9 @@ RUN apt-get update && \
     apache2 \
     mariadb-server \
     php \
-    php-mysql \
-    php-pgsql \
-    php-pear \
+    php-mysqli \
     php-gd \
+    libapache2-mod-php \
     && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
