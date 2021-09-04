@@ -2,10 +2,10 @@
 
 chown -R mysql:mysql /var/lib/mysql /var/run/mysqld
 
-echo '[+] Starting mysqld...'
-service mysqld start
+echo '[+] Starting mysql ...'
+service mysql start
 
-echo '[+] Starting apache'
+echo '[+] Starting apache ...'
 service apache2 start
 
 while true
