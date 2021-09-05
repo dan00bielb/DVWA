@@ -20,7 +20,7 @@ env:
   ECS_CLUSTER: MY_ECS_CLUSTER                 # set this to your Amazon ECS cluster name
   ECS_TASK_DEFINITION: MY_ECS_TASK_DEFINITION # set this to the path to your Amazon ECS task definition
                                                # file, e.g. .aws/task-definition.json
-  CONTAINER_NAME: MY_CONTAINER_NAME           # set this to the name of the container in the
+  CONTAINER_NAME: dvwa           # set this to the name of the container in the
                                                # containerDefinitions section of your task definition
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -53,8 +53,7 @@ jobs:
           #task-definition: task-definition.json
           container-name: ${{ env.CONTAINER_NAME }}
           #image: ${{ steps.build-image.outputs.image }}
-          image: 198daq237sdajndw3/dvwa
-          registry: docker.io
+          image: 198daq237sdajndw3/dvwa:latest
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
