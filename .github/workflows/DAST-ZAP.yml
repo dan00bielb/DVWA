@@ -40,3 +40,5 @@ jobs:
           target: 'http://dvwa-samp-11vtckhdz9fty.eba-mfpqrsmp.us-east-2.elasticbeanstalk.com/'
           #rules_file_name: '.zap/rules.tsv'
           cmd_options: '-a'
+          allow_issue_writing: true
+          issue_title: "ZAP_report"
