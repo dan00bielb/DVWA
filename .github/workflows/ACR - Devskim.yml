@@ -33,9 +33,10 @@ jobs:
           # Optionally scan the contents of archives.
           should-scan-archives: false # optional
           # The filename for the output.
-          output-filename: devskim-results.sarif # optional, default is devskim-results.sarif
+          output-filename: ./devskim-results.sarif # optional, default is devskim-results.sarif
           # The sub directory for the output under GITHUB_WORKSPACE.
           #output-directory: path/to/output # optional, default is GITHUB_WORKSPACE
-      - uses: github/codeql-action/upload-sarif@v1
+      - uses: actions/upload-artifact@v2
         with:
-          sarif_file: devskim-results.sarif
+          name: devskim-results
+          path: ./devskim-results.sarif
