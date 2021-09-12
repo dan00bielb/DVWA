@@ -32,7 +32,7 @@ jobs:
       - name: whitelist runner IP Address
         #aws s3 sync ./build s3://test-bucket
         run: |
-          aws ec2 create-network-acl-entry --network-acl-id acl-00c482d30cef5efcf --ingress --rule-number 90 --cidr-block ${{ steps.ip.outputs.ipv4 }}/32 --rule-action allow
+          aws ec2 create-network-acl-entry --network-acl-id acl-00c482d30cef5efcf --ingress --rule-number 90 --cidr-block ${{ steps.ip.outputs.ipv4 }}/32 --rule-action allow --protocol -1
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -51,3 +51,12 @@ jobs:
           cmd_options: '-a'
           allow_issue_writing: true
           issue_title: "ZAP_report"
+          
+      - name: cleanup whitelist runner IP Address
+        #aws s3 sync ./build s3://test-bucket
+        run: |
+          aws ec2 delete-network-acl-entry --network-acl-id acl-00c482d30cef5efcf --ingress --rule-number 90
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: 'us-east-2'
