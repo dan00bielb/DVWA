@@ -16,7 +16,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  build:
+  ACR-devskim:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -29,7 +29,7 @@ jobs:
         uses: microsoft/DevSkim-Action@v1
         with:
           # The sub directory of the repository root to scan. Repository root used by default.
-          directory-to-scan: dvwa # optional, default is GITHUB_WORKSPACE
+          directory-to-scan: .\dvwa # optional, default is GITHUB_WORKSPACE
           # Optionally scan the contents of archives.
           should-scan-archives: false # optional
           # The filename for the output.
