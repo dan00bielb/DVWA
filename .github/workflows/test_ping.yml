@@ -25,6 +25,24 @@ jobs:
       - name: Run a one-line script
         run: echo Hello, world!
 
+      - name: Github Runner Public IP
+        id: ip
+        uses: haythem/public-ip@v1.2
+
+      - name: Print Github Runner Public IP
+        run: |
+          echo ${{ steps.ip.outputs.ipv4 }}
+          echo ${{ steps.ip.outputs.ipv6 }}
+      
+      - name: whitelist runner IP Address
+        #aws s3 sync ./build s3://test-bucket
+        run: |
+          aws ec2 create-network-acl-entry --network-acl-id acl-00c482d30cef5efcf --ingress --rule-number 90 --cidr-block ${{ steps.ip.outputs.ipv4 }}/32 --rule-action allow
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: 'us-east-2'
+          
       # Runs a set of commands using the runners shell
       # http://dvwa-samp-11vtckhdz9fty.eba-mfpqrsmp.us-east-2.elasticbeanstalk.com/
       - name: Run a multi-line script
