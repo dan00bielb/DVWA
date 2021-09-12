@@ -53,3 +53,12 @@ jobs:
           cat test.txt
           curl -X GET http://dvwa-samp-11vtckhdz9fty.eba-mfpqrsmp.us-east-2.elasticbeanstalk.com/ -m 15 > test.txt
           cat test.txt
+          
+      - name: cleanup whitelist runner IP Address
+        #aws s3 sync ./build s3://test-bucket
+        run: |
+          aws ec2 delete-network-acl-entry --network-acl-id acl-00c482d30cef5efcf --ingress --rule-number 90
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: 'us-east-2'
