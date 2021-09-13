@@ -25,7 +25,7 @@ jobs:
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: Build & push Docker image
         with:
-          image: 198daq237sdajndw3/dvwa
+          image: 198daq237sdajndw3/dvwa # dockerhub user
           tags: v1, latest
           registry: docker.io
           dockerfile: Dockerfile
