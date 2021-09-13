@@ -4,8 +4,6 @@ name: aws-cloudformationEB-deploy
 
 # Controls when the workflow will run
 on:
-  
-
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -29,11 +27,11 @@ jobs:
           # The name of the CloudFormation stack
           name: DVWA 
           # The path or URL to the CloudFormation template
-          template: a
+          template: ./.aws/cloudformation.json
           # The comma-delimited list of stack template capabilities to acknowledge. Defaults to 'CAPABILITY_IAM'
           #capabilities: # optional, default is CAPABILITY_IAM
           # The parameters to override in the stack inputs. The list is comma-delimited, with each entry formatted as <ParameterName>=<ParameterValue>.
-          parameter-overrides: a=b
+          parameter-overrides: S3Bucket=b, S3Key=a, Subnets=a, VpcId=a
           # If the CloudFormation change set is empty, do not fail. Defaults to '0' (will fail on empty change set)
           #no-fail-on-empty-changeset: # optional, default is 0
           # Disable rollback of the stack if stack creation fails. Defaults to '0' (will rollback if stack creation fails). This input is only used for stack creation, not for stack update
