@@ -47,3 +47,4 @@ jobs:
           value: ${{ steps.EB_command.outputs.url }}
           repository: dan00bielb/DVWA
           token: ${{ secrets.GITHUB_TOKEN }}
+          visibility: 'all'
