@@ -27,7 +27,7 @@ jobs:
           # The name of the CloudFormation stack
           name: DVWA 
           # The path or URL to the CloudFormation template
-          template: ./.aws/cloudformation.json
+          template: .aws/cloudformation.json
           # The comma-delimited list of stack template capabilities to acknowledge. Defaults to 'CAPABILITY_IAM'
           #capabilities: # optional, default is CAPABILITY_IAM
           # The parameters to override in the stack inputs. The list is comma-delimited, with each entry formatted as <ParameterName>=<ParameterValue>.
