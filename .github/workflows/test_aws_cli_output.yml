@@ -39,3 +39,11 @@ jobs:
       - name: Print url from EB check
         run: |
           echo ${{ steps.EB_command.outputs.url }}
+          
+      - name: update DVWA URL secret
+        uses: hmanzur/actions-set-secret@v2.0.0
+        with:
+          name: 'DVWA_URL'
+          value: ${{ steps.EB_command.outputs.url }}
+          repository: hmanzur/actions-set-secret
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
