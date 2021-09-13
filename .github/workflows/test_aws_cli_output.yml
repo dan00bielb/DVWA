@@ -46,4 +46,4 @@ jobs:
           name: 'DVWA_URL'
           value: ${{ steps.EB_command.outputs.url }}
           repository: dan00bielb/DVWA
-          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
