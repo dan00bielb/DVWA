@@ -9,7 +9,8 @@ on:
 
 env:
   AWS_REGION: us-east-2                   # set this to your preferred AWS region, e.g. us-west-1
-  AWS_ACL_ID: acl-00c482d30cef5efcf
+  AWS_ACL_ID: acl-00c482d30cef5efcf       # ACL object for configuring inbound connections
+  
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -56,6 +57,7 @@ jobs:
           #tags: # optional
           # Whether to enable termination protection on the specified stack. Defaults to '0' (terminated protection will be disabled) This input is only used for stack creation, not for stack update
           #termination-protection: # optional, default is 0
+          
       # MY_PUBLIC_IPV4
       - name: whitelist my IP Address
         #aws s3 sync ./build s3://test-bucket
@@ -67,7 +69,6 @@ jobs:
           AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
       
       - name: whitelist VPC Subnet Address
-        #aws s3 sync ./build s3://test-bucket
         run: |
           aws ec2 create-network-acl-entry --network-acl-id ${{ env.AWS_ACL_ID }} --ingress --rule-number 99 --cidr-block 172.31.0.0/16 --rule-action allow --protocol -1
         env:
@@ -83,4 +84,17 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
+          
+      - name: Check the DVWA stack output for the access URL
+        id: EB_command
+        run: |
+          echo "::set-output name=url::$(aws cloudformation describe-stacks --stack-name DVWA --query "Stacks[0].Outputs[?OutputKey=='URL'].OutputValue" --output text)"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
+          
+      - name: Print url retrieved from EB check
+        run: |
+          echo ${{ steps.EB_command.outputs.url }}
       
