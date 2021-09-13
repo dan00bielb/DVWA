@@ -66,3 +66,12 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
       
+      - name: whitelist VPC Subnet Address
+        #aws s3 sync ./build s3://test-bucket
+        run: |
+          aws ec2 create-network-acl-entry --network-acl-id acl-00c482d30cef5efcf --ingress --rule-number 99 --cidr-block 172.31.0.0/16 --rule-action allow --protocol -1
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
+      
