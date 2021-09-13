@@ -45,5 +45,5 @@ jobs:
         with:
           name: 'DVWA_URL'
           value: ${{ steps.EB_command.outputs.url }}
-          repository: hmanzur/actions-set-secret
+          repository: dan00bielb/DVWA
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
