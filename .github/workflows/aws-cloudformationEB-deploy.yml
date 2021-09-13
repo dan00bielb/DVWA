@@ -31,7 +31,7 @@ jobs:
           # The comma-delimited list of stack template capabilities to acknowledge. Defaults to 'CAPABILITY_IAM'
           #capabilities: # optional, default is CAPABILITY_IAM
           # The parameters to override in the stack inputs. The list is comma-delimited, with each entry formatted as <ParameterName>=<ParameterValue>.
-          parameter-overrides: S3Bucket=b, S3Key=a, Subnets=a, VpcId=a
+          parameter-overrides: S3Bucket=${{ secrets.S3BUCKET }}, S3Key=${{ secrets.S3KEY }}, Subnets=${{ secrets.SUBNETS }}, VpcId=${{ secrets.VPCID }}
           # If the CloudFormation change set is empty, do not fail. Defaults to '0' (will fail on empty change set)
           #no-fail-on-empty-changeset: # optional, default is 0
           # Disable rollback of the stack if stack creation fails. Defaults to '0' (will rollback if stack creation fails). This input is only used for stack creation, not for stack update
@@ -46,3 +46,13 @@ jobs:
           #tags: # optional
           # Whether to enable termination protection on the specified stack. Defaults to '0' (terminated protection will be disabled) This input is only used for stack creation, not for stack update
           #termination-protection: # optional, default is 0
+      # MY_PUBLIC_IPV4
+      - name: whitelist my IP Address
+        #aws s3 sync ./build s3://test-bucket
+        run: |
+          aws ec2 create-network-acl-entry --network-acl-id acl-00c482d30cef5efcf --ingress --rule-number 90 --cidr-block ${{ secrets.MY_PUBLIC_IPV4 }}/32 --rule-action allow --protocol -1
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: 'us-east-2'
+      
