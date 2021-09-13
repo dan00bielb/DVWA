@@ -19,7 +19,7 @@ class TestDvwalogindatabasecreate():
     self.driver.quit()
   
   def test_dvwalogindatabasecreate(self):
-    self.driver.get("http://dvwa-samp-dc4mm3n5t542.eba-mpjsmshw.us-east-2.elasticbeanstalk.com/login.php")
+    self.driver.get("http://awseb-e-w-AWSEBLoa-1KZ40B03SHEUP-871702028.us-east-2.elb.amazonaws.com/login.php")
     self.driver.set_window_size(787, 693)
     self.driver.find_element(By.NAME, "username").click()
     self.driver.find_element(By.NAME, "username").send_keys("admin")
