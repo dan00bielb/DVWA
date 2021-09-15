@@ -75,6 +75,7 @@ jobs:
           pytest --url "${{ env.DVWA_URL }}" test_selenium.py
           
       - name: cleanup whitelist runner IP Address
+        if: always()
         #aws s3 sync ./build s3://test-bucket
         run: |
           aws ec2 delete-network-acl-entry --network-acl-id ${{ env.AWS_ACL_ID }} --ingress --rule-number 90
