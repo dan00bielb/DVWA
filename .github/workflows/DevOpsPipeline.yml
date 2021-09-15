@@ -62,7 +62,7 @@ jobs:
    
   deploy:
      needs: check_aws_stack
-     if: jobs.check_aws_stack.outputs.DVWA_URL == ''
+     if: needs.check_aws_stack.outputs.DVWA_URL == ''
      runs-on: ubuntu-latest
      steps:
        - uses: actions/checkout@v2
@@ -132,7 +132,7 @@ jobs:
             
   update:
      needs: check_aws_stack
-     if: jobs.check_aws_stack.outputs.DVWA_URL != ''
+     if: needs.check_aws_stack.outputs.DVWA_URL != ''
      runs-on: ubuntu-latest
      steps:
        - uses: actions/checkout@v2
