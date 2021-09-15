@@ -19,7 +19,10 @@ jobs:
   test_aws_cli_output:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
+    permissions: write-all
+    #  issues: write
+    #  pull-requests: write
+      
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -37,12 +40,12 @@ jobs:
           AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
           
       - name: Print url from EB check
-        if: ${{ steps.EB_command.outcome == 'success' }} #failure
+        if: ${{ steps.EB_command.outputs.url != '' }} #failure
         run: |
           echo ${{ steps.EB_command.outputs.url }}
         
       - name: Print url from EB check
-        if: ${{ failure() }}
+        if: ${{ steps.EB_command.outputs.url == '' }} #failure()
         run: |
           echo FAILED MAAAAN ${{ steps.EB_command.outputs.url }}
           
