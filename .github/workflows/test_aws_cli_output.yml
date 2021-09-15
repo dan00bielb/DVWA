@@ -37,7 +37,7 @@ jobs:
           AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
           
       - name: Print url from EB check
-        if: steps.EB_command.outcome == "success" #failure
+        if: steps.EB_command.outcome = "success" #failure
         run: |
           echo ${{ steps.EB_command.outputs.url }}
         
@@ -47,7 +47,7 @@ jobs:
           echo FAILED MAAAAN ${{ steps.EB_command.outputs.url }}
           
       - name: Second Print url from EB check
-        if: steps.EB_command.outcome == "success"
+        if: steps.EB_command.outcome = "success"
         run: |
           echo JOSECONDPRINTHERE ${{ steps.EB_command.outputs.url }}
           
