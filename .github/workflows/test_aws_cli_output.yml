@@ -29,7 +29,7 @@ jobs:
       - name: Run a aws cloudformation command
         id: EB_command
         run: |
-          echo "::set-output name=url::$(aws cloudformation describe-stacks --stack-name DVWA --query "Stacks[0].Outputs[?OutputKey=='URL'].OutputValue" --output text)"
+          echo "::set-output name=url::$(aws cloudformation describe-stacks --stack-name notexisting --query "Stacks[0].Outputs[?OutputKey=='URL'].OutputValue" --output text)"
 
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -37,8 +37,19 @@ jobs:
           AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
           
       - name: Print url from EB check
+        if: steps.EB_command.outcome == "success" #failure
         run: |
           echo ${{ steps.EB_command.outputs.url }}
+        
+      - name: Print url from EB check
+        if: ${{ failure() }}
+        run: |
+          echo FAILED MAAAAN ${{ steps.EB_command.outputs.url }}
+          
+      - name: Second Print url from EB check
+        if: steps.EB_command.outcome == "success"
+        run: |
+          echo JOSECONDPRINTHERE ${{ steps.EB_command.outputs.url }}
           
       - name: update DVWA URL secret
         uses: hmanzur/actions-set-secret@v2.0.0
@@ -48,3 +59,4 @@ jobs:
           repository: dan00bielb/DVWA
           token: ${{ secrets.GITHUB_TOKEN }}
           visibility: 'all'
+        
