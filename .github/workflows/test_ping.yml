@@ -9,6 +9,12 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+env:
+  AWS_REGION: us-east-2                   # set this to your preferred AWS region, e.g. us-west-1
+  AWS_ACL_ID: acl-00c482d30cef5efcf       # ACL object for configuring inbound connections
+  STACK_NAME: DVWA
+  DVWA_URL: http://dvwa-samp-1bo0rckbc73ci.eba-jewkgbxg.us-east-2.elasticbeanstalk.com
+  
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -37,11 +43,11 @@ jobs:
       - name: whitelist runner IP Address
         #aws s3 sync ./build s3://test-bucket
         run: |
-          aws ec2 create-network-acl-entry --network-acl-id acl-00c482d30cef5efcf --ingress --rule-number 90 --cidr-block ${{ steps.ip.outputs.ipv4 }}/32 --rule-action allow --protocol -1
+          aws ec2 create-network-acl-entry --network-acl-id ${{ env.AWS_ACL_ID }} --ingress --rule-number 90 --cidr-block ${{ steps.ip.outputs.ipv4 }}/32 --rule-action allow --protocol -1
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: 'us-east-2'
+          AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
           
       # Runs a set of commands using the runners shell
       # http://dvwa-samp-11vtckhdz9fty.eba-mfpqrsmp.us-east-2.elasticbeanstalk.com/
@@ -51,7 +57,7 @@ jobs:
           cat test.txt
           curl -X GET https://google.com > test.txt
           cat test.txt
-          curl -X GET http://awseb-e-w-AWSEBLoa-1KZ40B03SHEUP-871702028.us-east-2.elb.amazonaws.com -m 15 > test.txt
+          curl -X GET ${{ env.DVWA_URL }} -m 15 > test.txt
           cat test.txt
           
       - name: Set up Python ${{ matrix.python-version }}
@@ -66,13 +72,13 @@ jobs:
           
       - name: Run pytest test_selenium.py --browser=chrome --headless
         run: |
-          pytest test_selenium.py
+          pytest --url "${{ env.DVWA_URL }}" test_selenium.py
           
       - name: cleanup whitelist runner IP Address
         #aws s3 sync ./build s3://test-bucket
         run: |
-          aws ec2 delete-network-acl-entry --network-acl-id acl-00c482d30cef5efcf --ingress --rule-number 90
+          aws ec2 delete-network-acl-entry --network-acl-id ${{ env.AWS_ACL_ID }} --ingress --rule-number 90
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: 'us-east-2'
+          AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
