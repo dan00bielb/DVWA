@@ -12,6 +12,10 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.firefox.options import Options
 
 class TestDvwalogindatabasecreate():
+  @pytest.fixture()
+  def name(pytestconfig):
+    return pytestconfig.getoption("url")
+    
   def setup_method(self, method):
     options = Options()
     options.headless = True
@@ -21,8 +25,8 @@ class TestDvwalogindatabasecreate():
   def teardown_method(self, method):
     self.driver.quit()
   
-  def test_dvwalogindatabasecreate(self):
-    self.driver.get("http://awseb-e-w-AWSEBLoa-1KZ40B03SHEUP-871702028.us-east-2.elb.amazonaws.com/login.php")
+  def test_dvwalogindatabasecreate(self, url):
+    self.driver.get({name})
     self.driver.set_window_size(787, 693)
     self.driver.find_element(By.NAME, "username").click()
     self.driver.find_element(By.NAME, "username").send_keys("admin")
