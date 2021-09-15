@@ -69,17 +69,17 @@ jobs:
          name: Check out code
          
        - name: Configure AWS credentials
-          uses: aws-actions/configure-aws-credentials@v1
-          with:
+         uses: aws-actions/configure-aws-credentials@v1
+         with:
             aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
             aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             aws-region: ${{ env.AWS_REGION }}
 
-        - name: AWS CloudFormation "Deploy EB CloudFormation Stack" IaC Deploy
+       - name: AWS CloudFormation "Deploy EB CloudFormation Stack" IaC Deploy
           # You may pin to the exact commit or the version.
           # uses: aws-actions/aws-cloudformation-github-deploy@dfbee8a4fec90af61b71bafda3890f8c4a2075ef
-          uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
-          with:
+         uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
+         with:
             # The name of the CloudFormation stack
             name: DVWA 
             # The path or URL to the CloudFormation template
@@ -103,34 +103,34 @@ jobs:
             # Whether to enable termination protection on the specified stack. Defaults to '0' (terminated protection will be disabled) This input is only used for stack creation, not for stack update
             #termination-protection: # optional, default is 0
 
-        # MY_PUBLIC_IPV4
-        - name: whitelist my IP Address
-          #aws s3 sync ./build s3://test-bucket
-          run: |
+       # MY_PUBLIC_IPV4
+       - name: whitelist my IP Address
+         #aws s3 sync ./build s3://test-bucket
+         run: |
             aws ec2 create-network-acl-entry --network-acl-id ${{ env.AWS_ACL_ID }} --ingress --rule-number 98 --cidr-block ${{ secrets.MY_PUBLIC_IPV4 }}/32 --rule-action allow --protocol -1
-          env:
+         env:
             AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
             AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
 
-        - name: whitelist VPC Subnet Address
-          run: |
+       - name: whitelist VPC Subnet Address
+         run: |
             aws ec2 create-network-acl-entry --network-acl-id ${{ env.AWS_ACL_ID }} --ingress --rule-number 99 --cidr-block 172.31.0.0/16 --rule-action allow --protocol -1
-          env:
+         env:
             AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
             AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
 
-        - name: remove IP internet ingress rule
-          #aws s3 sync ./build s3://test-bucket
-          run: |
+       - name: remove IP internet ingress rule
+         #aws s3 sync ./build s3://test-bucket
+         run: |
             aws ec2 delete-network-acl-entry --network-acl-id ${{ env.AWS_ACL_ID }} --ingress --rule-number 100
-          env:
+         env:
             AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
             AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
             
-   update:
+  update:
      needs: check_aws_stack
      if: ${{ jobs.check_aws_stack.outputs.DVWA_URL != '' }}
      runs-on: ubuntu-latest
@@ -145,7 +145,7 @@ jobs:
             AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
             AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
-   test:
+  test:
      needs: [deploy, update]
      runs-on: ubuntu-latest
      
