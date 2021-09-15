@@ -140,12 +140,13 @@ jobs:
          name: Check out code
          
        - name: Update DVWA AWS environment
+         #aws eb deploy ${{ needs.check_aws_stack.outputs.DVWA_environment }}
          run: |
-           aws eb deploy ${{ needs.check_aws_stack.outputs.DVWA_environment }}
+           aws elasticbeanstalk update-environment --environment-name ${{ needs.check_aws_stack.outputs.DVWA_environment }}
          env:
-            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
+           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+           AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
   test:
      needs: [deploy, update]
      runs-on: ubuntu-latest
