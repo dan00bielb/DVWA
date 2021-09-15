@@ -48,7 +48,7 @@ jobs:
          id: EB_command
          run: |
            echo "::set-output name=url::$(aws cloudformation describe-stacks --stack-name notexisting --query "Stacks[0].Outputs[?OutputKey=='URL'].OutputValue" --output text)"
-           echo "::set-output name=sampleenvironment::$(aws cloudformation describe-stacks --stack-name notexisting --query "Stacks[0].Outputs[?OutputKey=='SampleEnvironment'].OutputValue" --output text)"
+           echo "::set-output name=sampleenvironment::$(aws cloudformation describe-stacks --stack-name DVWA --query "Stacks[0].Outputs[?OutputKey=='SampleEnvironment'].OutputValue" --output text)"
          env:
            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
