@@ -148,7 +148,7 @@ jobs:
   test:
      needs: [deploy, update]
      runs-on: ubuntu-latest
-     
+     if: always()
      steps:
        - uses: actions/checkout@v2
          name: Check out code
