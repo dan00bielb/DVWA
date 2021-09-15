@@ -1,4 +1,4 @@
-name: DevOps Pipeline
+name: DevOpsPipeline
 
 # Controls when the workflow will run
 on:
