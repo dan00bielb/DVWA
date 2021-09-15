@@ -34,7 +34,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           
-   check_aws_stack:
+  check_aws_stack:
      needs: build
      runs-on: ubuntu-latest
      outputs:
@@ -60,7 +60,7 @@ jobs:
            echo DVWA URL: ${{ steps.EB_command.outputs.url }}
            echo DVWA environment: ${{ steps.EB_command.outputs.sampleenvironment }}
    
-   deploy:
+  deploy:
      needs: check_aws_stack
      if: ${{ jobs.check_aws_stack.outputs.DVWA_URL == '' }}
      runs-on: ubuntu-latest
