@@ -140,7 +140,7 @@ jobs:
          
        - name: Update DVWA AWS environment
          run: |
-           aws eb deploy ${{ jobs.check_aws_stack.outputs.DVWA_environment }}
+           aws eb deploy ${{ needs.check_aws_stack.outputs.DVWA_environment }}
          env:
             AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
             AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -183,7 +183,7 @@ jobs:
 
        - name: Run pytest test_selenium.py --browser=chrome --headless
          run: |
-           pytest test_selenium.py ${{ jobs.check_aws_stack.outputs.DVWA_URL }}
+           pytest test_selenium.py ${{ needs.check_aws_stack.outputs.DVWA_URL }}
 
        - name: cleanup whitelist runner IP Address
          #aws s3 sync ./build s3://test-bucket
