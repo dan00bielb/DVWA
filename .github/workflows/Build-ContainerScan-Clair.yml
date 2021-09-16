@@ -29,7 +29,7 @@ jobs:
       - name: Install Clair
         run: |
           ls -l
-          sudo apt install docker.io golang
+          sudo apt install containerd docker.io golang
           
           make build
           make cross
