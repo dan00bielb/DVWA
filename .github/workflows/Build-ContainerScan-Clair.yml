@@ -19,6 +19,7 @@ jobs:
     #docker-compose exec clairctl clairctl analyze -l ${{ env.docker_image }}
     # docker-compose-data/clairctl-reports/html
     # Steps represent a sequence of tasks that will be executed as part of the job
+    # clair-scanner `${{ env.docker_image }}:latest`
     steps:
       - name: Check out Clair package
         uses: actions/checkout@master
@@ -28,16 +29,18 @@ jobs:
       - name: Install Clair
         run: |
           ls -l
-          sudo apt install docker docker-compose
+          sudo apt install docker docker-compose golang
+          
           make build
-          make installLocal
-          clair-scanner -h
+          make cross
+          ls -l
+          ./clair-scanner -h
       - name: Run Container Scan
         run: |
           docker run -p 5432:5432 -d --name db arminc/clair-db:latest
           docker run -p 6060:6060 --link db:postgres -d --name clair arminc/clair-local-scan:latest
-          clair-scanner `${{ env.docker_image }}:latest`
-          
+          ls -l
+          ./clair-scanner --ip 172.17.0.1 -r report.json `${{ env.docker_image }}:latest`
           ls -l
           
 
