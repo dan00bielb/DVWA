@@ -18,12 +18,16 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      
+      - name: Check out Clair package
+        uses: actions/checkout@master
+        with:
+          repository: Charlie-belmer/Docker-security-example
+          
       - name: Install Clair
         run: |
+          ls -l
           sudo apt install docker docker-compose
           sudo usermod -a -G docker `whoami`
-          git clone git@github.com:Charlie-belmer/Docker-security-example.git   
           cd Docker-security-example/clair/   
           docker-compose up
       - name: Run Container Scan
