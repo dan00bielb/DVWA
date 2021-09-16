@@ -28,7 +28,7 @@ jobs:
           ls -l
           sudo apt install docker docker-compose
           sudo usermod -a -G docker `whoami`
-          cd Docker-security-example/clair/   
+          cd clair/   
           docker-compose up
       - name: Run Container Scan
         run: |
