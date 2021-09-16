@@ -31,7 +31,7 @@ jobs:
           sudo apt install docker docker-compose
           make build
           make installLocal
-          ./clair-scanner -h
+          clair-scanner -h
       - name: Run Container Scan
         run: |
           docker run -p 5432:5432 -d --name db arminc/clair-db:latest
