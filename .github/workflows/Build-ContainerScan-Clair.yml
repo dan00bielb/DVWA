@@ -4,29 +4,33 @@ name: Build-ContainerScan-Clair
 
 # Controls when the workflow will run
 on:
-  
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+env:
+  docker_image: "198daq237sdajndw3/dvwa"
+  
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  build:
+  Clair_Container_Scan:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      
+      - name: Install Clair
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          sudo apt install docker docker-compose
+          sudo usermod -a -G docker `whoami`
+          git clone git@github.com:Charlie-belmer/Docker-security-example.git   
+          cd Docker-security-example/clair/   
+          docker-compose up
+      - name: Run Container Scan
+        run: |
+          docker pull ${{ env.docker_image }}
+          docker-compose exec clairctl clairctl analyze -l ${{ env.docker_image }}
+          # docker-compose-data/clairctl-reports/html
+          ls -l
+          
+
