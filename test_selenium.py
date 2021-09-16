@@ -9,40 +9,52 @@ from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from selenium.webdriver.firefox.options import Options
 
-class TestDvwalogindatabasecreate():
-  @pytest.fixture()
-  def name(pytestconfig):
-    return pytestconfig.getoption("url")
-    
+class TestLoginconfigure():
   def setup_method(self, method):
-    options = Options()
-    options.headless = True
-    self.driver = webdriver.Firefox(options=options)
+    self.driver = webdriver.Firefox()
     self.vars = {}
   
   def teardown_method(self, method):
     self.driver.quit()
   
-  def test_dvwalogindatabasecreate(self, url):
-    self.driver.get({name})
-    self.driver.set_window_size(787, 693)
+  def test_loginconfigure(self):
+    # Test name: login&configure
+    # Step # | name | target | value
+    # 1 | open | /login.php | 
+    self.driver.get("http://dvwa-samp-1bo0rckbc73ci.eba-jewkgbxg.us-east-2.elasticbeanstalk.com/login.php")
+    # 2 | setWindowSize | 787x695 | 
+    self.driver.set_window_size(787, 695)
+    # 3 | click | name=username | 
     self.driver.find_element(By.NAME, "username").click()
+    # 4 | type | name=username | admin
     self.driver.find_element(By.NAME, "username").send_keys("admin")
-    self.driver.find_element(By.NAME, "password").send_keys("password")
+    # 5 | click | id=wrapper | 
     self.driver.find_element(By.ID, "wrapper").click()
+    # 6 | click | name=password | 
+    self.driver.find_element(By.NAME, "password").click()
+    # 7 | type | name=password | password
+    self.driver.find_element(By.NAME, "password").send_keys("password")
+    # 8 | click | id=content | 
+    self.driver.find_element(By.ID, "content").click()
+    # 9 | click | name=Login | 
     self.driver.find_element(By.NAME, "Login").click()
-    element = self.driver.find_element(By.NAME, "Login")
-    actions = ActionChains(self.driver)
-    actions.move_to_element(element).perform()
-    element = self.driver.find_element(By.CSS_SELECTOR, "body")
-    actions = ActionChains(self.driver)
-    actions.move_to_element(element, 0, 0).perform()
+    # 10 | click | name=create_db | 
     self.driver.find_element(By.NAME, "create_db").click()
+    # 11 | click | linkText=login | 
+    self.driver.find_element(By.LINK_TEXT, "login").click()
+    # 12 | click | name=username | 
     self.driver.find_element(By.NAME, "username").click()
+    # 13 | type | name=username | admin
     self.driver.find_element(By.NAME, "username").send_keys("admin")
-    self.driver.find_element(By.NAME, "password").send_keys("password")
+    # 14 | click | id=wrapper | 
     self.driver.find_element(By.ID, "wrapper").click()
+    # 15 | click | name=password | 
+    self.driver.find_element(By.NAME, "password").click()
+    # 16 | type | name=password | password
+    self.driver.find_element(By.NAME, "password").send_keys("password")
+    # 17 | click | id=wrapper | 
+    self.driver.find_element(By.ID, "wrapper").click()
+    # 18 | click | name=Login | 
     self.driver.find_element(By.NAME, "Login").click()
   
