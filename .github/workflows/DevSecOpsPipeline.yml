@@ -353,7 +353,7 @@ jobs:
            pip install pytest
        - name: Run pytest test_selenium.py --browser=chrome --headless
          run: |
-           pytest --url "${{ needs.check_aws_stack.outputs.DVWA_URL }}" test_selenium.py
+           pytest test_selenium.py "${{ needs.check_aws_stack.outputs.DVWA_URL }}"
            
        - name: cleanup whitelist runner IP Address
          #aws s3 sync ./build s3://test-bucket
