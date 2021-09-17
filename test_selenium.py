@@ -5,7 +5,7 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
 
-target_url = "http://dvwa-samp-1bo0rckbc73ci.eba-jewkgbxg.us-east-2.elasticbeanstalk.com/login.php"
+#target_url = "http://dvwa-samp-1bo0rckbc73ci.eba-jewkgbxg.us-east-2.elasticbeanstalk.com/login.php"
 
 @pytest.fixture(scope="session")      
 def get_driver():
@@ -17,7 +17,7 @@ def get_driver():
     driver.close()
     
 @pytest.mark.usefixtures("get_driver")
-def test_data():
+def test_data(target_url):
     
     # Test name: login&configure
     # Step # | name | target | value
