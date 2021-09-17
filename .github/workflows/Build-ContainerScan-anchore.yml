@@ -38,6 +38,7 @@ jobs:
           image: "${{ env.docker_image }}:latest"
           
       - name: upload Anchore scan SARIF report
+        if: always()
         uses: github/codeql-action/upload-sarif@v1
         with:
           sarif_file: ${{ steps.scan.outputs.sarif }}
