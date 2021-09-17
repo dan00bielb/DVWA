@@ -82,7 +82,11 @@ jobs:
         
       #- name: Whitelist Runner IP on AWS
       #  uses: dunno
-        
+      - name: testecho
+        run: |
+          echo ${{ needs.deploy-check-aws-stack.outputs.DVWA_URL }}
+          echo ${{ needs.deploy-check-aws-stack.outputs.DVWA_environment }}
+          
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.3.0
         with:
