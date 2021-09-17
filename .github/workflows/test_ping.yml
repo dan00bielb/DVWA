@@ -66,15 +66,13 @@ jobs:
           pip install selenium
           pip install pytest
           pip install requests
-          
-      - name: Append target url to selenium script
-        run: |
-          sed ' 8 s@.*@&${{ env.DVWA_URL }}"@' test_selenium.py
-          cat test_selenium.py
+       
           
       - name: Run pytest test_selenium.py --browser=chrome --headless
         # pytest --url "${{ env.DVWA_URL }}" test_selenium.py
         run: |
+          sed ' 8 s@.*@&${{ env.DVWA_URL }}"@' test_selenium.py
+          cat test_selenium.py
           pytest test_selenium.py
           
       - name: cleanup whitelist runner IP Address
