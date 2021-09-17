@@ -8,7 +8,9 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-
+  
+env:
+  docker_image: "198daq237sdajndw3/dvwa"
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -25,11 +27,11 @@ jobs:
       - name: build local container
         uses: docker/build-push-action@v2
         with:
-          tags: localbuild/testimage:latest
+          tags: ${{ env.docker_image }}:latest
           push: false
           load: true
 
       - name: Scan image
         uses: anchore/scan-action@v3
         with:
-          image: "localbuild/testimage:latest"
+          image: "${{ env.docker_image }}:latest"
