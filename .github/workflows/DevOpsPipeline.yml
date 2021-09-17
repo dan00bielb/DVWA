@@ -35,7 +35,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           
-  check_aws_stack:
+  deploy-check-aws-stack:
      needs: build
      runs-on: ubuntu-latest
      outputs:
@@ -62,8 +62,8 @@ jobs:
            echo DVWA environment: ${{ steps.EB_command.outputs.sampleenvironment }}
    
   deploy:
-     needs: check_aws_stack
-     if: needs.check_aws_stack.outputs.DVWA_URL == ''
+     needs: deploy-check-aws-stack
+     if: always() && (needs.deploy-check-aws-stack.outputs.DVWA_URL == '')
      runs-on: ubuntu-latest
      steps:
        - uses: actions/checkout@v2
@@ -131,26 +131,26 @@ jobs:
             AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
             
-  update:
-     needs: check_aws_stack
-     if: needs.check_aws_stack.outputs.DVWA_URL != ''
+  deploy-update:
+     needs: deploy-check-aws-stack
+     if: always() && (needs.deploy-check-aws-stack.outputs.DVWA_URL != '')
      runs-on: ubuntu-latest
      steps:
        - uses: actions/checkout@v2
          name: Check out code
          
        - name: Update DVWA AWS environment
-         #aws eb deploy ${{ needs.check_aws_stack.outputs.DVWA_environment }}
+         #aws eb deploy ${{ needs.deploy-check-aws-stack.outputs.DVWA_environment }}
          run: |
-           aws elasticbeanstalk update-environment --environment-name ${{ needs.check_aws_stack.outputs.DVWA_environment }}
+           aws elasticbeanstalk update-environment --environment-name ${{ needs.deploy-check-aws-stack.outputs.DVWA_environment }}
          env:
            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
            AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
   test:
-     needs: [deploy, update]
+     needs: [deploy, deploy-update, deploy-check-aws-stack]
      runs-on: ubuntu-latest
-     if: always()
+     if: always() && (needs.deploy.result == 'success' || needs.deploy-update.result == 'success')
      steps:
        - uses: actions/checkout@v2
          name: Check out code
@@ -182,10 +182,11 @@ jobs:
          run: |
            pip install selenium
            pip install pytest
+           pip install requests
 
        - name: Run pytest test_selenium.py --browser=chrome --headless
          run: |
-           pytest --url "${{ needs.check_aws_stack.outputs.DVWA_URL }}" test_selenium.py
+           pytest test_selenium.py
 
        - name: cleanup whitelist runner IP Address
          #aws s3 sync ./build s3://test-bucket
