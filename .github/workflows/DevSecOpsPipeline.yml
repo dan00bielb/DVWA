@@ -15,7 +15,7 @@ env:
   AWS_REGION: us-east-2                   # set this to your preferred AWS region, e.g. us-west-1
   AWS_ACL_ID: acl-00c482d30cef5efcf       # ACL object for configuring inbound connections
   STACK_NAME: DVWA
-  
+  DVWA_DOCKERHUB: 198daq237sdajndw3/dvwa
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -121,7 +121,7 @@ jobs:
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: Build & push Docker image
         with:
-          image: 198daq237sdajndw3/dvwa # dockerhub user
+          image: ${{ env.DVWA_DOCKERHUB }} # dockerhub user
           tags: v1, latest
           registry: docker.io
           dockerfile: Dockerfile
@@ -150,7 +150,7 @@ jobs:
         uses: anchore/scan-action@v3
         id: scan
         with:
-          image: "${{ DVWA_DOCKERHUB }}:latest"
+          image: "${{ env.DVWA_DOCKERHUB }}:latest"
           
           
       - uses: actions/upload-artifact@v2
