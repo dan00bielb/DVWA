@@ -110,6 +110,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: build-dockerlint
+    if: always()
     steps:
       - uses: actions/checkout@v2
         name: Check out code
@@ -353,6 +354,7 @@ jobs:
        - name: Run pytest test_selenium.py --browser=chrome --headless
          run: |
            pytest --url "${{ needs.check_aws_stack.outputs.DVWA_URL }}" test_selenium.py
+           
        - name: cleanup whitelist runner IP Address
          #aws s3 sync ./build s3://test-bucket
          if: always()
