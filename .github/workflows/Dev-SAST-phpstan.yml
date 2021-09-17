@@ -13,3 +13,8 @@ jobs:
         uses: php-actions/phpstan@v3
         with:
           path: src/
+          
+      - name: check local directory
+        if: always()
+        run: |
+          ls -l
