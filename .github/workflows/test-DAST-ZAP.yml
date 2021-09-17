@@ -89,10 +89,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           docker_name: 'owasp/zap2docker-stable'
           target: ${{ needs.deploy-check-aws-stack.outputs.DVWA_URL }}
-          #rules_file_name: '.zap/rules.tsv'
           cmd_options: '-a'
-          allow_issue_writing: true
-          issue_title: "ZAP_report"
           
       - name: cleanup whitelist runner IP Address
         #aws s3 sync ./build s3://test-bucket
