@@ -86,9 +86,9 @@ jobs:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.2.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          docker_name: 'owasp/zap2docker-stable'
           target: '${{ needs.deploy-check-aws-stack.outputs.DVWA_URL }}'
+          docker_name: 'owasp/zap2docker-stable'
+          token: ${{ secrets.GITHUB_TOKEN }}
           cmd_options: '-a'
           
       - name: cleanup whitelist runner IP Address
