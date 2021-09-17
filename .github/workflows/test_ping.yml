@@ -69,7 +69,7 @@ jobs:
           
       - name: Append target url to selenium script
         run: |
-          sed ' 5 s@.*@&${{ env.DVWA_URL }}@' test_selenium.py
+          sed ' 8 s@.*@&${{ env.DVWA_URL }}"@' test_selenium.py
           cat test_selenium.py
           
       - name: Run pytest test_selenium.py --browser=chrome --headless
