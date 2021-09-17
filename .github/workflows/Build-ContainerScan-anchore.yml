@@ -42,9 +42,10 @@ jobs:
         run: |
           ls -l
           
-      - name: upload Anchore scan SARIF report
-        if: always()
-        uses: github/codeql-action/upload-sarif@v1
+      
+          
+      - uses: actions/upload-artifact@v2
         with:
-          sarif_file: ${{ steps.scan.outputs.sarif }}
+          name: results
+          path: ./results.sarif
         
