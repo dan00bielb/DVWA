@@ -12,18 +12,28 @@ jobs:
       - name: Failed
         run: |
           exit 1
+      - name: Needs context
+        env:
+          NEEDS_CONTEXT: ${{ toJSON(needs) }}
+        run: |
+          echo "$NEEDS_CONTEXT"
   Ajob2:
     runs-on: ubuntu-latest
     steps:
       - name: Succeed
         run: |
           echo "ok"
+      - name: Needs context
+        env:
+          NEEDS_CONTEXT: ${{ toJSON(needs) }}
+        run: |
+          echo "$NEEDS_CONTEXT"
           
   Bjob:
     runs-on: ubuntu-latest
     needs: [Ajob1, Ajob2]
     #if: always() && (needs.job1.result == 'failure' || needs.job2.result == 'failure')
-    if: (needs.Ajob1.result == 'success' || needs.Ajob2.result == 'success')
+    if: always() && (needs.Ajob1.result == 'success' || needs.Ajob2.result == 'success')
     steps:
       - name: Needs context
         env:
