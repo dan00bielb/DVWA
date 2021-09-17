@@ -24,6 +24,12 @@ jobs:
       - name: trufflehog-actions-scan
         uses: edplato/trufflehog-actions-scan@master
         
+      - name: trufflehog-actions-check
+        if: always()
+        uses: UnicornGlobal/trufflehog-actions-scan@v1.0.0
+        
+  
       - name: check local directory
+        if: always()
         run: |
           ls -l
