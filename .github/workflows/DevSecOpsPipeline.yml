@@ -319,7 +319,7 @@ jobs:
            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
            AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
   test:
-     needs: [deploy, deploy-update]
+     needs: [deploy, deploy-update, deploy-check-aws-stack]
      runs-on: ubuntu-latest
      if: always() && (needs.deploy.result == 'success' || needs.deploy-update.result == 'success')
      steps:
@@ -371,7 +371,7 @@ jobs:
            
   test-DAST-zap:
     runs-on: ubuntu-latest
-    needs: test
+    needs: [test, deploy-check-aws-stack]
     if: always() && (needs.test.result == 'success')
     steps:
       - name: Checkout
