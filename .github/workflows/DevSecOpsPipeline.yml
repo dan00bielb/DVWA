@@ -15,7 +15,7 @@ env:
   AWS_REGION: us-east-2                   # set this to your preferred AWS region, e.g. us-west-1
   AWS_ACL_ID: acl-00c482d30cef5efcf       # ACL object for configuring inbound connections
   STACK_NAME: DVWA
-  DVWA_DOCKERHUB: '198daq237sdajndw3/dvwa'
+  
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -121,7 +121,7 @@ jobs:
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: Build & push Docker image
         with:
-          image: ${{ DVWA_DOCKERHUB }} # dockerhub user
+          image: 198daq237sdajndw3/dvwa # dockerhub user
           tags: v1, latest
           registry: docker.io
           dockerfile: Dockerfile
@@ -203,7 +203,7 @@ jobs:
           #baseline: cloudformation/.checkov.baseline
           
   deploy-check-aws-stack:
-     needs: [build-CaC-cfripper,build-CaC-checkov]
+     needs: [build-docker-anchore,build-CaC-cfripper,build-CaC-checkov]
      if: always()
      runs-on: ubuntu-latest
      outputs:
@@ -365,7 +365,6 @@ jobs:
            
   test-DAST-zap:
     runs-on: ubuntu-latest
-    name: Scan the webapplication
     needs: test
     steps:
       - name: Checkout
