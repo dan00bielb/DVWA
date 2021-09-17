@@ -46,7 +46,8 @@ jobs:
           
   Cjob1:
     runs-on: ubuntu-latest
-    if: needs.Bjob.result == 'success'
+    if: always()
+    needs: Bjob
     steps:
       - name: Needs context
         env:
