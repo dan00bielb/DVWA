@@ -71,7 +71,7 @@ jobs:
       - name: Run pytest test_selenium.py --browser=chrome --headless
         # pytest --url "${{ env.DVWA_URL }}" test_selenium.py
         run: |
-          sed ' 8 s@.*@&${{ env.DVWA_URL }}"@' test_selenium.py
+          sed " 8 s@.*@&'${{ env.DVWA_URL }}'@" test_selenium.py
           cat test_selenium.py > test_selenium2.py
           pytest test_selenium2.py
           
