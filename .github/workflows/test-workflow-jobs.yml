@@ -46,7 +46,7 @@ jobs:
           
   Cjob1:
     runs-on: ubuntu-latest
-    if: always()
+    if: always() && (needs.Bjob.result == 'success')
     needs: Bjob
     steps:
       - name: Needs context
@@ -60,6 +60,7 @@ jobs:
           
   Cjob2:
     runs-on: ubuntu-latest
+    if: always() && (needs.Bjob.result == 'success')
     needs: Bjob
     steps:
       - name: Needs context
@@ -73,6 +74,7 @@ jobs:
           
   Djob:
     runs-on: ubuntu-latest
+    if: always() && (needs.Cjob1.result == 'success' || needs.Cjob2.result == 'success')
     needs: [Cjob1, Cjob2]
     steps:
       - name: Needs context
@@ -87,6 +89,7 @@ jobs:
   Ejob:
     runs-on: ubuntu-latest
     needs: Djob
+    if: always() && (needs.Djob.result == 'success')
     steps:
       - name: Needs context
         env:
