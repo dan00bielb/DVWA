@@ -15,29 +15,198 @@ env:
   AWS_REGION: us-east-2                   # set this to your preferred AWS region, e.g. us-west-1
   AWS_ACL_ID: acl-00c482d30cef5efcf       # ACL object for configuring inbound connections
   STACK_NAME: DVWA
+  DVWA_DOCKERHUB: 198daq237sdajndw3/dvwa
+
   
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
 
-  build:
+  dev-ACR-devskim:
+    runs-on: ubuntu-latest
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: DevSkim
+        uses: microsoft/DevSkim-Action@v1
+        with:
+          # The sub directory of the repository root to scan. Repository root used by default.
+          directory-to-scan: ./dvwa # optional, default is GITHUB_WORKSPACE
+          # Optionally scan the contents of archives.
+          should-scan-archives: false # optional
+          # The filename for the output.
+          output-filename: ./devskim-results.sarif # optional, default is devskim-results.sarif
+          # The sub directory for the output under GITHUB_WORKSPACE.
+          #output-directory: path/to/output # optional, default is GITHUB_WORKSPACE
+      - uses: actions/upload-artifact@v2
+        with:
+          name: results-ACR-devskim
+          path: ./devskim-results.sarif
+          
+  dev-SCA-depcheck:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+  
+      - name: Depcheck
+        uses: dependency-check/Dependency-Check_Action@main
+        id: Depcheck
+        with:
+          project: 'DVWA'
+          path: './dvwa'
+          format: 'HTML'    
+          others: ''
+      - name: Upload depcheck results
+        uses: actions/upload-artifact@master
+        with:
+           name: results-SCA-depcheck
+           path: ${{github.workspace}}/reports
+           
+  dev-SAST-sonarcloud:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        # Disabling shallow clone is recommended for improving relevancy of reporting
+        fetch-depth: 0
+    - name: SonarCloud
+      uses: sonarsource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        
+  dev-SIS-tufflehog:
+    # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - uses: actions/checkout@master
+        name: github checkout
+        
+      - name: trufflehog-actions-scan
+        uses: edplato/trufflehog-actions-scan@master
+        
+      - name: trufflehog-actions-check
+        if: always()
+        uses: UnicornGlobal/trufflehog-actions-scan@v1.0.0
+
+  build-dockerlint:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    needs: [dev-ACR-devskim, dev-SCA-depcheck, dev-SAST-sonarcloud, dev-SIS-tufflehog]
+    if: always()
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - uses: ghe-actions/dockerfile-validator@v1
+        with:
+          dockerfile: 'Dockerfile'
+          #lint: 'hadolint'
+          
+  build:
+    runs-on: ubuntu-latest
+    needs: build-dockerlint
     steps:
       - uses: actions/checkout@v2
         name: Check out code
-
+  
+      - uses: ghe-actions/dockerfile-validator@v1
+        with:
+          dockerfile: 'Dockerfile'
+          #lint: 'hadolint'
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: Build & push Docker image
         with:
-          image: 198daq237sdajndw3/dvwa # dockerhub user
+          image: ${{ DVWA_DOCKERHUB }} # dockerhub user
           tags: v1, latest
           registry: docker.io
           dockerfile: Dockerfile
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+  
+  build-docker-anchore:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    needs: build
+    
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: build local container
+        uses: docker/build-push-action@v2
+        with:
+          tags: ${{ DVWA_DOCKERHUB }}:latest
+          push: false
+          load: true
+
+      - name: Scan image
+        uses: anchore/scan-action@v3
+        id: scan
+        with:
+          image: "${{ DVWA_DOCKERHUB }}:latest"
+          
+          
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: results-Docker-anchore
+          path: ./results.sarif
+          
+  build-CaC-cfripper:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    needs: build
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      # Runs a single command using the runners shell
+      - name: Run a one-line script
+        run: |
+          pip install cfripper
+          cfripper .aws/cloudformation.json --format txt > cfripper-results.txt
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: results-CaC-cfripper
+          path: ./cfripper-results.txt
+          
+  build-CaC-checkov:
+    runs-on: ubuntu-latest
+    needs: build
+    name: checkov-action
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@master
+
+      - name: Run Checkov action
+        id: checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .aws/cloudformation.json
+          #check: CKV_AWS_1 # optional: run only a specific check_id. can be comma separated list
+          #skip_check: CKV_AWS_1 # optional: skip a specific check_id. can be comma separated list
+          #quiet: true # optional: display only failed checks
+          #soft_fail: true # optional: do not return an error code if there are failed checks
+          framework: cloudformation # optional: run only on a specific infrastructure {cloudformation,terraform,kubernetes,all}
+          #output_format: json # optional: the output format, one of: cli, json, junitxml, github_failed_only
+          #download_external_modules: true # optional: download external terraform modules from public git repositories and terraform registry
+          #log_level: DEBUG # optional: set log level. Default WARNING
+          #config_file: 
+          #baseline: cloudformation/.checkov.baseline
           
   check_aws_stack:
-     needs: build
+     needs: [build-CaC-cfripper,build-CaC-checkov]
+     if: always()
      runs-on: ubuntu-latest
      outputs:
        DVWA_URL: ${{ steps.EB_command.outputs.url }}
@@ -195,3 +364,52 @@ jobs:
            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
            AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
+           
+  test-DAST-zap:
+    runs-on: ubuntu-latest
+    name: Scan the webapplication
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        
+      - name: Github Runner Public IP
+        id: ip
+        uses: haythem/public-ip@v1.2
+
+      - name: Print Github Runner Public IP
+        run: |
+          echo ${{ steps.ip.outputs.ipv4 }}
+          echo ${{ steps.ip.outputs.ipv6 }}
+      
+      - name: whitelist runner IP Address
+        #aws s3 sync ./build s3://test-bucket
+        run: |
+          aws ec2 create-network-acl-entry --network-acl-id ${{ env.AWS_ACL_ID }} --ingress --rule-number 90 --cidr-block ${{ steps.ip.outputs.ipv4 }}/32 --rule-action allow --protocol -1
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
+        
+      #- name: Whitelist Runner IP on AWS
+      #  uses: dunno
+        
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.2.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          docker_name: 'owasp/zap2docker-stable'
+          target: '${{ needs.check_aws_stack.outputs.DVWA_URL }}'
+          #rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a'
+          allow_issue_writing: true
+          issue_title: "ZAP_report"
+          
+      - name: cleanup whitelist runner IP Address
+        #aws s3 sync ./build s3://test-bucket
+        run: |
+          aws ec2 delete-network-acl-entry --network-acl-id ${{ env.AWS_ACL_ID }} --ingress --rule-number 90
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
