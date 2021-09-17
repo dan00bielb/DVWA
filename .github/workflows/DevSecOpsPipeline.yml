@@ -311,9 +311,9 @@ jobs:
          name: Check out code
          
        - name: Update DVWA AWS environment
-         #aws eb deploy ${{ needs.check_aws_stack.outputs.DVWA_environment }}
+         #aws eb deploy ${{ needs.deploy-check-aws-stack.outputs.DVWA_environment }}
          run: |
-           aws elasticbeanstalk update-environment --environment-name ${{ needs.check_aws_stack.outputs.DVWA_environment }}
+           aws elasticbeanstalk update-environment --environment-name ${{ needs.deploy-check-aws-stack.outputs.DVWA_environment }}
          env:
            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
