@@ -1,0 +1,104 @@
+name: test-DAST-ZAP
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  #push:
+  #  branches: [ master ]
+  #pull_request:
+  #  branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-2                   # set this to your preferred AWS region, e.g. us-west-1
+  AWS_ACL_ID: acl-00c482d30cef5efcf       # ACL object for configuring inbound connections
+  STACK_NAME: DVWA
+  DVWA_DOCKERHUB: 198daq237sdajndw3/dvwa
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+
+  deploy-check-aws-stack:
+     
+     runs-on: ubuntu-latest
+     outputs:
+       DVWA_URL: ${{ steps.EB_command.outputs.url }}
+       DVWA_environment: ${{ steps.EB_command.outputs.sampleenvironment }}
+     steps:
+       - uses: actions/checkout@v2
+         name: Check out code
+         
+       - name: Check if DVWA Stack is already defined
+         id: EB_command
+         run: |
+           echo "::set-output name=url::$(aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} --query "Stacks[0].Outputs[?OutputKey=='URL'].OutputValue" --output text)"
+           echo "::set-output name=sampleenvironment::$(aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} --query "Stacks[0].Outputs[?OutputKey=='SampleEnvironment'].OutputValue" --output text)"
+         env:
+           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+           AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
+           
+       - name: Print results from EB check
+         if: ${{ steps.EB_command.outputs.url != '' }} #failure
+         run: |
+           echo DVWA URL: ${{ steps.EB_command.outputs.url }}
+           echo DVWA environment: ${{ steps.EB_command.outputs.sampleenvironment }}
+   
+  test:
+    runs-on: ubuntu-latest
+    needs: deploy-check-aws-stack
+    steps:
+      - name: testecho
+        run: |
+          echo "cham"
+          
+  test-DAST-zap:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        
+      - name: Github Runner Public IP
+        id: ip
+        uses: haythem/public-ip@v1.2
+
+      - name: Print Github Runner Public IP
+        run: |
+          echo ${{ steps.ip.outputs.ipv4 }}
+          echo ${{ steps.ip.outputs.ipv6 }}
+      
+      - name: whitelist runner IP Address
+        #aws s3 sync ./build s3://test-bucket
+        run: |
+          aws ec2 create-network-acl-entry --network-acl-id ${{ env.AWS_ACL_ID }} --ingress --rule-number 90 --cidr-block ${{ steps.ip.outputs.ipv4 }}/32 --rule-action allow --protocol -1
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
+        
+      #- name: Whitelist Runner IP on AWS
+      #  uses: dunno
+        
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.2.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          docker_name: 'owasp/zap2docker-stable'
+          target: 'http://${{ needs.deploy-check-aws-stack.outputs.DVWA_URL }}'
+          #rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a'
+          allow_issue_writing: true
+          issue_title: "ZAP_report"
+          
+      - name: cleanup whitelist runner IP Address
+        #aws s3 sync ./build s3://test-bucket
+        if: always()
+        run: |
+          aws ec2 delete-network-acl-entry --network-acl-id ${{ env.AWS_ACL_ID }} --ingress --rule-number 90
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
