@@ -34,6 +34,8 @@ jobs:
     needs: [Ajob1, Ajob2]
     #if: always() && (needs.job1.result == 'failure' || needs.job2.result == 'failure')
     if: always() && (needs.Ajob1.result == 'success' || needs.Ajob2.result == 'success')
+    outputs:
+       VAR: ${{ steps.finish.outputs.status }}
     steps:
       - name: Needs context
         env:
@@ -41,12 +43,13 @@ jobs:
         run: |
           echo "$NEEDS_CONTEXT"
       - name: Succeed
+        id: finish
         run: |
-          echo "ok"
+          echo "::set-output name=status::$(echo ok)"
           
   Cjob1:
     runs-on: ubuntu-latest
-    if: always() && (needs.Bjob.result == 'success')
+    if: always() && (needs.Bjob.outputs.status == 'ok')
     needs: Bjob
     steps:
       - name: Needs context
@@ -60,7 +63,7 @@ jobs:
           
   Cjob2:
     runs-on: ubuntu-latest
-    if: always() && (needs.Bjob.result == 'success')
+    if: always() && (needs.Bjob.outputs.status != 'ok')
     needs: Bjob
     steps:
       - name: Needs context
