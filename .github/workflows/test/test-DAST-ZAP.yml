@@ -86,6 +86,26 @@ jobs:
         run: |
           echo ${{ needs.deploy-check-aws-stack.outputs.DVWA_URL }}
           echo ${{ needs.deploy-check-aws-stack.outputs.DVWA_environment }}
+      
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.9
+          
+      - name: Install Selenium
+        run: |
+          pip install selenium
+          pip install pytest
+          pip install requests
+       
+          
+      - name: Run pytest test_selenium.py --browser=chrome --headless
+        # pytest --url "${{ env.DVWA_URL }}" test_selenium.py
+        # sed " 8 s@.*@&'${{ env.DVWA_URL }}'@" test_selenium.py
+        # cat test_selenium.py > test_selenium2.py
+        run: |
+          
+          pytest --url "${{ needs.deploy-check-aws-stack.outputs.DVWA_URL }}" test_selenium.py
           
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.3.0
