@@ -67,6 +67,8 @@ jobs:
         run: |
           echo ${{ needs.deploy-check-aws-stack.outputs.DVWA_URL }}
           echo ${{ needs.deploy-check-aws-stack.outputs.DVWA_environment }}
+          echo "DVWA_URL=${{ needs.deploy-check-aws-stack.outputs.DVWA_URL }}" >> $GITHUB_ENV
+          echo "DVWA_environment=${{ needs.deploy-check-aws-stack.outputs.DVWA_environment }}" >> $GITHUB_ENV
           
   test-DAST-zap:
     runs-on: ubuntu-latest
@@ -78,8 +80,8 @@ jobs:
         
       - name: testecho
         run: |
-          echo ${{ needs.deploy-check-aws-stack.outputs.DVWA_URL }}
-          echo ${{ needs.deploy-check-aws-stack.outputs.DVWA_environment }}  
+          echo ${{ env.DVWA_URL }}
+          echo ${{ env.DVWA_environment }}  
           
       - name: Github Runner Public IP
         id: ip
@@ -101,10 +103,11 @@ jobs:
         
       #- name: Whitelist Runner IP on AWS
       #  uses: dunno
+      # needs.deploy-check-aws-stack.outputs.DVWA_environment
       - name: testecho
         run: |
-          echo ${{ needs.deploy-check-aws-stack.outputs.DVWA_URL }}
-          echo ${{ needs.deploy-check-aws-stack.outputs.DVWA_environment }}
+          echo ${{ env.DVWA_URL }}
+          echo ${{ env.DVWA_environment }}
       
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
@@ -124,7 +127,7 @@ jobs:
         # cat test_selenium.py > test_selenium2.py
         run: |
           
-          pytest --url "${{ needs.deploy-check-aws-stack.outputs.DVWA_URL }}" test_selenium.py
+          pytest --url "${{ env.DVWA_URL }}" test_selenium.py
           
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.3.0
