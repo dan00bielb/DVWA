@@ -45,7 +45,7 @@ def test_data(url):
     driver.find_element(By.NAME, "Login").click()
     # 10 | click | name=create_db | 
     
-    '''
+    
     driver.find_element(By.NAME, "create_db").click()
     # 11 | click | linkText=login | 
     driver.find_element(By.LINK_TEXT, "login").click()
@@ -63,4 +63,4 @@ def test_data(url):
     driver.find_element(By.ID, "wrapper").click()
     # 18 | click | name=Login | 
     driver.find_element(By.NAME, "Login").click()
-    '''
+    
