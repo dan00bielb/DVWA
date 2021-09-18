@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 # http://dvwa-samp-1bo0rckbc73ci.eba-jewkgbxg.us-east-2.elasticbeanstalk.com/login.php"
 
 @pytest.fixture()
-def name(pytestconfig):
+def url(pytestconfig):
     return pytestconfig.getoption("url")
 
 @pytest.fixture(scope="session")      
