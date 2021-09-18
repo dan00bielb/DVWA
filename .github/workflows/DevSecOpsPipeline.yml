@@ -343,6 +343,22 @@ jobs:
            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
            AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
+           
+       - name: Check if DVWA Stack is already defined
+         id: EB_command
+         run: |
+           echo "::set-output name=url::$(aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} --query "Stacks[0].Outputs[?OutputKey=='URL'].OutputValue" --output text)"
+           echo "::set-output name=sampleenvironment::$(aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} --query "Stacks[0].Outputs[?OutputKey=='SampleEnvironment'].OutputValue" --output text)"
+         env:
+           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+           AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
+           
+       - name: Print results from EB check
+         if: ${{ steps.EB_command.outputs.url != '' }} #failure
+         run: |
+           echo DVWA URL: ${{ steps.EB_command.outputs.url }}
+           echo DVWA environment: ${{ steps.EB_command.outputs.sampleenvironment }}
 
        - name: Set up Python ${{ matrix.python-version }}
          uses: actions/setup-python@v1
@@ -357,7 +373,7 @@ jobs:
        - name: Run pytest test_selenium.py --browser=chrome --headless
          # "${{ needs.deploy-check-aws-stack.outputs.DVWA_URL }}"
          run: |
-           pytest --url "${{ needs.deploy-check-aws-stack.outputs.DVWA_URL }}" test_selenium.py 
+           pytest --url "${{ steps.EB_command.outputs.url }}" test_selenium.py 
            
        - name: cleanup whitelist runner IP Address
          #aws s3 sync ./build s3://test-bucket
@@ -397,13 +413,28 @@ jobs:
         
       #- name: Whitelist Runner IP on AWS
       #  uses: dunno
-        
+      - name: Check if DVWA Stack is already defined
+        id: EB_command
+        run: |
+          echo "::set-output name=url::$(aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} --query "Stacks[0].Outputs[?OutputKey=='URL'].OutputValue" --output text)"
+          echo "::set-output name=sampleenvironment::$(aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} --query "Stacks[0].Outputs[?OutputKey=='SampleEnvironment'].OutputValue" --output text)"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
+           
+      - name: Print results from EB check
+        if: ${{ steps.EB_command.outputs.url != '' }} #failure
+        run: |
+          echo DVWA URL: ${{ steps.EB_command.outputs.url }}
+          echo DVWA environment: ${{ steps.EB_command.outputs.sampleenvironment }}
+           
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.3.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           docker_name: 'owasp/zap2docker-stable'
-          target: '${{ needs.deploy-check-aws-stack.outputs.DVWA_URL }}'
+          target: '${{ steps.EB_command.outputs.url }}'
           #rules_file_name: '.zap/rules.tsv'
           cmd_options: '-a'
           issue_title: "ZAP_report"
